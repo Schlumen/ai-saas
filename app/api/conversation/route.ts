@@ -25,7 +25,7 @@ export async function POST(req: Request) {
     }
 
     const response = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
+      model: "gpt-4-turbo-preview",
       messages,
     });
 
@@ -35,35 +35,3 @@ export async function POST(req: Request) {
     return new NextResponse("Internal error", { status: 500 });
   }
 }
-
-/*
-
-For anyone getting the interface issue (openaiv4 had some changes):
-
-import OpenAI from "openai" //we only need to import this from openai
-const userMessage: OpenAI.Chat.ChatCompletionMessage = {
-
-        role: "user",
-
-        content: values.prompt
-
-      }
-
-For node.js, no need to import configuration, here also we only need to import OpenAI.
-const openai = new OpenAI ({
-
-    apiKey: process.env.OPENAI_API_KEY
-
-})
-
-        const response = await openai.chat.completions.create({
-
-            model: "gpt-3.5-turbo",
-
-            messages: [instructionMessage, ...messages],
-
-        })
-
-        return new NextResponse(JSON.stringify(response.choices[0].message))
-
-*/
