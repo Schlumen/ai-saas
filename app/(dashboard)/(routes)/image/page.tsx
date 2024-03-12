@@ -2,15 +2,11 @@
 
 import axios from "axios";
 import * as z from "zod";
-import { Code } from "lucide-react";
+import { MessageSquare } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import ReactMarkdown from "react-markdown";
-import rehypeHighlight from "rehype-highlight";
-
-//import "highlight.js/styles/atom-one-dark.min.css";
 
 import Heading from "@/components/heading";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
@@ -23,14 +19,13 @@ import { Loader } from "@/components/loader";
 import { cn } from "@/lib/utils";
 import { UserAvatar } from "@/components/user-avatar";
 import { BotAvatar } from "@/components/bot-avatar";
-import CodeChat from "@/components/code-chat";
 
 type ChatCompletionMessage = {
   role: "user" | "assistant";
   content: string;
 };
 
-const CodePage = () => {
+const ConversationPage = () => {
   const router = useRouter();
   const [messages, setMessages] = useState<ChatCompletionMessage[]>([]);
 
@@ -50,7 +45,7 @@ const CodePage = () => {
         content: values.prompt,
       };
       const newMessages = [...messages, userMessage];
-      const response = await axios.post("/api/code", {
+      const response = await axios.post("/api/conversation", {
         messages: newMessages,
       });
       setMessages(current => [...current, userMessage, response.data]);
@@ -67,11 +62,11 @@ const CodePage = () => {
   return (
     <div>
       <Heading
-        title="Code Generation"
-        description="Generate code using descriptive text."
-        icon={Code}
-        iconColor="text-green-700"
-        bgColor="bg-green-700/10"
+        title="Conversation"
+        description="Our most advanced conversational model"
+        icon={MessageSquare}
+        iconColor="text-violet-500"
+        bgColor="bg-violet-500/10"
       />
       <div className="px-4 lg:px-8">
         <div>
@@ -89,7 +84,7 @@ const CodePage = () => {
                         autoComplete="off"
                         className="border-0 outline-none focus-visible:ring-0 focus-visible:ring-transparent"
                         disabled={isLoading}
-                        placeholder="Simple toggle button using react hooks."
+                        placeholder="How do I calculate the area of a circle?"
                         {...field}
                       />
                     </FormControl>
@@ -115,15 +110,37 @@ const CodePage = () => {
             <div>
               <Empty
                 label="No conversation started."
-                imagePath="/empty_code.png"
+                imagePath="/empty_conversation.png"
               />
             </div>
           )}
-          <CodeChat messages={messages || []} />
+          <div className="flex flex-col-reverse gap-y-4">
+            {messages.map(message => (
+              <div
+                key={message.content}
+                className={cn(
+                  "p-8 w-full flex items-start gap-x-8 rounded-lg",
+                  message.role === "user"
+                    ? "bg-white border border-black/10"
+                    : "bg-muted"
+                )}
+              >
+                {message.role === "user" ? <UserAvatar /> : <BotAvatar />}
+                <p className="text-sm">
+                  {message.content.split("\n").map((line, index) => (
+                    <span key={index}>
+                      {line}
+                      <br />
+                    </span>
+                  ))}
+                </p>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
   );
 };
 
-export default CodePage;
+export default ConversationPage;
