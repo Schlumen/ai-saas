@@ -7,10 +7,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import ReactMarkdown from "react-markdown";
-import rehypeHighlight from "rehype-highlight";
-
-//import "highlight.js/styles/atom-one-dark.min.css";
 
 import Heading from "@/components/heading";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
@@ -20,9 +16,6 @@ import { Button } from "@/components/ui/button";
 import { formSchema } from "./constants";
 import { Empty } from "@/components/empty";
 import { Loader } from "@/components/loader";
-import { cn } from "@/lib/utils";
-import { UserAvatar } from "@/components/user-avatar";
-import { BotAvatar } from "@/components/bot-avatar";
 import CodeChat from "@/components/code-chat";
 
 type ChatCompletionMessage = {
