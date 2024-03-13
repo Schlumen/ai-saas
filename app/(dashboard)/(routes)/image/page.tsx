@@ -24,7 +24,6 @@ import { Button } from "@/components/ui/button";
 import { amountOptions, formSchema, resolutionOptions } from "./constants";
 import { Empty } from "@/components/empty";
 import { Loader } from "@/components/loader";
-import { cn } from "@/lib/utils";
 import { Card, CardFooter } from "@/components/ui/card";
 
 const ImagePage = () => {
@@ -36,7 +35,7 @@ const ImagePage = () => {
     defaultValues: {
       prompt: "",
       amount: "1",
-      resolution: "512x512",
+      resolution: "1024x1024",
     },
   });
 
@@ -47,7 +46,9 @@ const ImagePage = () => {
       setImages([]);
 
       const response = await axios.post("/api/image", values);
-      const urls = response.data.map((image: { url: string }) => image.url);
+      const urls = response.data.map(
+        (image: [{ url: string }]) => image[0].url
+      );
 
       setImages(urls);
       form.reset();
@@ -182,6 +183,7 @@ const ImagePage = () => {
               >
                 <div className="relative aspect-square">
                   <Image
+                    className="object-cover"
                     alt="Image"
                     fill
                     src={src}
