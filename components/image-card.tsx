@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { Card, CardFooter } from "@/components/ui/card";
-import { Download } from "lucide-react";
+import { Eye } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Loader } from "./loader";
@@ -27,8 +27,8 @@ export default function ImageCard({ src }: { src: string }) {
           variant="secondary"
           className="w-full"
         >
-          <Download className="h-4 w-4 mr-2" />
-          Download
+          <Eye className="h-4 w-4 mr-2" />
+          Open
         </Button>
       </CardFooter>
     </Card>
