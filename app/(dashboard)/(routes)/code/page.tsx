@@ -17,6 +17,7 @@ import { formSchema } from "./constants";
 import { Empty } from "@/components/empty";
 import { Loader } from "@/components/loader";
 import CodeChat from "@/components/code-chat";
+import { useProModal } from "@/hooks/use-pro-modal";
 
 type ChatCompletionMessage = {
   role: "user" | "assistant";
@@ -24,6 +25,7 @@ type ChatCompletionMessage = {
 };
 
 const CodePage = () => {
+  const proModal = useProModal();
   const router = useRouter();
   const [messages, setMessages] = useState<ChatCompletionMessage[]>([]);
 
@@ -50,8 +52,9 @@ const CodePage = () => {
 
       form.reset();
     } catch (error: any) {
-      //Tdoo: Open Pro Modal
-      console.log(error);
+      if (error?.response?.status === 403) {
+        proModal.onOpen();
+      }
     } finally {
       router.refresh();
     }
