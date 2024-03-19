@@ -66,9 +66,14 @@ const routes = [
 interface SidebarProps {
   apiLimitCount: number;
   isPro: boolean;
+  closeSidebar(): void;
 }
 
-const Sidebar = ({ apiLimitCount = 0, isPro = false }: SidebarProps) => {
+const Sidebar = ({
+  apiLimitCount = 0,
+  isPro = false,
+  closeSidebar = () => {},
+}: SidebarProps) => {
   const pathname = usePathname();
   return (
     <div className="space-y-4 py-4 flex flex-col h-full bg-[#111827] text-white">
@@ -92,6 +97,7 @@ const Sidebar = ({ apiLimitCount = 0, isPro = false }: SidebarProps) => {
         <div className="space-y-1">
           {routes.map(route => (
             <Link
+              onClick={closeSidebar}
               href={route.href}
               key={route.href}
               className={cn(
