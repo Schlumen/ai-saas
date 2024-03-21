@@ -43,6 +43,17 @@ export async function POST(req: Request) {
         ),
       },
     });
+
+    await prismadb.subscriptionApiLimit.create({
+      data: {
+        userId: session?.metadata?.userId,
+        stripeSubscriptionId: subscription.id,
+        textCount: 0,
+        imageCount: 0,
+        videoCount: 0,
+        musicCount: 0,
+      },
+    });
   }
 
   if (event.type === "invoice.payment_succeeded") {
@@ -63,6 +74,18 @@ export async function POST(req: Request) {
         stripeCurrentPeriodEnd: new Date(
           subscription.current_period_end * 1000
         ),
+      },
+    });
+
+    await prismadb.subscriptionApiLimit.update({
+      where: {
+        stripeSubscriptionId: subscription.id,
+      },
+      data: {
+        textCount: 0,
+        imageCount: 0,
+        videoCount: 0,
+        musicCount: 0,
       },
     });
   }

@@ -24,3 +24,15 @@ model UserSubscription {
   stripePriceId          String?   @map(name: "stripe_price_id")
   stripeCurrentPeriodEnd DateTime? @map(name: "stripe_current_period_end")
 }
+
+model SubscriptionApiLimit {
+  id                   String   @id @default(cuid())
+  stripeSubscriptionId String?  @unique @map(name: "stripe_subscription_id")
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  userId               String   @unique
+  textCount            Int      @default(0)
+  imageCount           Int      @default(0)
+  videoCount           Int      @default(0)
+  musicCount           Int      @default(0)
+}
