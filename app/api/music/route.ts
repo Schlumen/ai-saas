@@ -2,7 +2,12 @@ import { auth } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
 import Replicate from "replicate";
 
-import { increaseApiLimit, checkApiLimit } from "@/lib/api-limit";
+import {
+  increaseApiLimit,
+  checkApiLimit,
+  increaseSubscriptionApiLimit,
+  checkSubscriptionApiLimit,
+} from "@/lib/api-limit";
 import { checkSubscription } from "@/lib/subscription";
 
 const replicate = new Replicate({
@@ -30,6 +35,14 @@ export async function POST(req: Request) {
       return new NextResponse("Free trial has expired", { status: 403 });
     }
 
+    if (isPro) {
+      const apiLimitOk = await checkSubscriptionApiLimit("music");
+
+      if (!apiLimitOk) {
+        return new NextResponse("API limit exceeded", { status: 429 });
+      }
+    }
+
     const response = await replicate.run(
       "riffusion/riffusion:8cf61ea6c56afd61d8f5b9ffd14d7c216c0a93844ce2d82ac1c9ecc9c7f24e05",
       {
@@ -39,7 +52,9 @@ export async function POST(req: Request) {
       }
     );
 
-    if (!isPro) {
+    if (isPro) {
+      await increaseSubscriptionApiLimit("music");
+    } else {
       await increaseApiLimit();
     }
 

@@ -32,28 +32,73 @@ export async function POST(req: Request) {
       return new NextResponse("User id is required", { status: 400 });
     }
 
-    await prismadb.userSubscription.create({
-      data: {
+    const userSubscription = await prismadb.userSubscription.findUnique({
+      where: {
         userId: session?.metadata?.userId,
-        stripeSubscriptionId: subscription.id,
-        stripeCustomerId: subscription.customer as string,
-        stripePriceId: subscription.items.data[0].price.id,
-        stripeCurrentPeriodEnd: new Date(
-          subscription.current_period_end * 1000
-        ),
       },
     });
 
-    await prismadb.subscriptionApiLimit.create({
-      data: {
-        userId: session?.metadata?.userId,
-        stripeSubscriptionId: subscription.id,
-        textCount: 0,
-        imageCount: 0,
-        videoCount: 0,
-        musicCount: 0,
-      },
-    });
+    if (userSubscription) {
+      await prismadb.userSubscription.update({
+        where: {
+          userId: session?.metadata?.userId,
+        },
+        data: {
+          stripeSubscriptionId: subscription.id,
+          stripeCustomerId: subscription.customer as string,
+          stripePriceId: subscription.items.data[0].price.id,
+          stripeCurrentPeriodEnd: new Date(
+            subscription.current_period_end * 1000
+          ),
+        },
+      });
+    } else {
+      await prismadb.userSubscription.create({
+        data: {
+          userId: session?.metadata?.userId,
+          stripeSubscriptionId: subscription.id,
+          stripeCustomerId: subscription.customer as string,
+          stripePriceId: subscription.items.data[0].price.id,
+          stripeCurrentPeriodEnd: new Date(
+            subscription.current_period_end * 1000
+          ),
+        },
+      });
+    }
+
+    const SubscriptionApiLimit = await prismadb.subscriptionApiLimit.findUnique(
+      {
+        where: {
+          userId: session?.metadata?.userId,
+        },
+      }
+    );
+
+    if (SubscriptionApiLimit) {
+      await prismadb.subscriptionApiLimit.update({
+        where: {
+          userId: session?.metadata?.userId,
+        },
+        data: {
+          stripeSubscriptionId: subscription.id,
+          textCount: 0,
+          imageCount: 0,
+          videoCount: 0,
+          musicCount: 0,
+        },
+      });
+    } else {
+      await prismadb.subscriptionApiLimit.create({
+        data: {
+          userId: session?.metadata?.userId,
+          stripeSubscriptionId: subscription.id,
+          textCount: 0,
+          imageCount: 0,
+          videoCount: 0,
+          musicCount: 0,
+        },
+      });
+    }
   }
 
   if (event.type === "invoice.payment_succeeded") {
@@ -61,33 +106,47 @@ export async function POST(req: Request) {
       session.subscription as string
     );
 
-    if (!session?.metadata?.userId) {
-      return new NextResponse("User id is required", { status: 400 });
+    const userSubscription = await prismadb.userSubscription.findUnique({
+      where: {
+        stripeSubscriptionId: subscription.id,
+      },
+    });
+
+    if (userSubscription) {
+      await prismadb.userSubscription.update({
+        where: {
+          stripeSubscriptionId: subscription.id,
+        },
+        data: {
+          stripePriceId: subscription.items.data[0].price.id,
+          stripeCurrentPeriodEnd: new Date(
+            subscription.current_period_end * 1000
+          ),
+        },
+      });
     }
 
-    await prismadb.userSubscription.update({
-      where: {
-        stripeSubscriptionId: subscription.id,
-      },
-      data: {
-        stripePriceId: subscription.items.data[0].price.id,
-        stripeCurrentPeriodEnd: new Date(
-          subscription.current_period_end * 1000
-        ),
-      },
-    });
+    const SubscriptionApiLimit = await prismadb.subscriptionApiLimit.findUnique(
+      {
+        where: {
+          stripeSubscriptionId: subscription.id,
+        },
+      }
+    );
 
-    await prismadb.subscriptionApiLimit.update({
-      where: {
-        stripeSubscriptionId: subscription.id,
-      },
-      data: {
-        textCount: 0,
-        imageCount: 0,
-        videoCount: 0,
-        musicCount: 0,
-      },
-    });
+    if (SubscriptionApiLimit) {
+      await prismadb.subscriptionApiLimit.update({
+        where: {
+          stripeSubscriptionId: subscription.id,
+        },
+        data: {
+          textCount: 0,
+          imageCount: 0,
+          videoCount: 0,
+          musicCount: 0,
+        },
+      });
+    }
   }
 
   return new NextResponse(null, { status: 200 });

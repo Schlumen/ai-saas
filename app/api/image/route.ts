@@ -2,7 +2,12 @@ import { auth } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
 
-import { increaseApiLimit, checkApiLimit } from "@/lib/api-limit";
+import {
+  increaseApiLimit,
+  checkApiLimit,
+  increaseSubscriptionApiLimit,
+  checkSubscriptionApiLimit,
+} from "@/lib/api-limit";
 import { checkSubscription } from "@/lib/subscription";
 
 const openai = new OpenAI({
@@ -42,6 +47,17 @@ export async function POST(req: Request) {
       return new NextResponse("Free trial has expired", { status: 403 });
     }
 
+    if (isPro) {
+      const apiLimitOk = await checkSubscriptionApiLimit(
+        "image",
+        parseInt(amount)
+      );
+
+      if (!apiLimitOk) {
+        return new NextResponse("API limit exceeded", { status: 429 });
+      }
+    }
+
     const promises = [];
 
     for (let i = 0; i < parseInt(amount); i++) {
@@ -57,7 +73,9 @@ export async function POST(req: Request) {
     const responses = await Promise.all(promises);
     const data = responses.map(response => response.data);
 
-    if (!isPro) {
+    if (isPro) {
+      await increaseSubscriptionApiLimit("image", parseInt(amount));
+    } else {
       await increaseApiLimit();
     }
 

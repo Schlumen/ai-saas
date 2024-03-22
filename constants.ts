@@ -2,6 +2,13 @@ import { Code, ImageIcon, MessageSquare, Music, VideoIcon } from "lucide-react";
 
 export const MAX_FREE_COUNTS = 5;
 
+export const API_LIMITS = {
+  text: 2500,
+  image: 100,
+  music: 500,
+  video: 60,
+};
+
 export const TOOLS = [
   {
     label: "Conversation",

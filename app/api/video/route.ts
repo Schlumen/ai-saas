@@ -2,7 +2,12 @@ import { auth } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
 import Replicate from "replicate";
 
-import { increaseApiLimit, checkApiLimit } from "@/lib/api-limit";
+import {
+  increaseApiLimit,
+  checkApiLimit,
+  increaseSubscriptionApiLimit,
+  checkSubscriptionApiLimit,
+} from "@/lib/api-limit";
 import { checkSubscription } from "@/lib/subscription";
 
 const replicate = new Replicate({
@@ -30,6 +35,14 @@ export async function POST(req: Request) {
       return new NextResponse("Free trial has expired", { status: 403 });
     }
 
+    if (isPro) {
+      const apiLimitOk = await checkSubscriptionApiLimit("video");
+
+      if (!apiLimitOk) {
+        return new NextResponse("API limit exceeded", { status: 429 });
+      }
+    }
+
     const response = await replicate.run(
       "anotherjesse/zeroscope-v2-xl:9f747673945c62801b13b84701c783929c0ee784e4748ec062204894dda1a351",
       {
@@ -39,7 +52,9 @@ export async function POST(req: Request) {
       }
     );
 
-    if (!isPro) {
+    if (isPro) {
+      await increaseSubscriptionApiLimit("video");
+    } else {
       await increaseApiLimit();
     }
 
