@@ -80,8 +80,10 @@ export async function POST(req: Request) {
     }
 
     return NextResponse.json(data);
-  } catch (error) {
+  } catch (error: any) {
     console.log("[IMAGE ERROR]", error);
-    return new NextResponse("Internal error", { status: 500 });
+    return new NextResponse(error?.error?.message || "Internal error", {
+      status: 500,
+    });
   }
 }
